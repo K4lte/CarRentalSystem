@@ -143,6 +143,7 @@ public class BookingServlet extends HttpServlet {
 		
 	}
 
+	
 	private void bookCar(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		Integer creditCardTypeId = Integer.valueOf(request.getParameter("creditCardType"));
 		String creditCardNumber = request.getParameter("creditCardNumber");

@@ -66,7 +66,29 @@
 
 <script type="text/javascript">
 function initialize(){
-
+/*	var request = CreateRequest();
+   	request.open('GET', 'info', true); 
+   	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+            if (request.status == 200){
+            	showTable(request.responseText);
+  /*          	var cart = JSON.parse(request.responseText);
+            		let period = document.getElementById("period");
+            		let locationPickUp = document.getElementById("locationPickUp");
+            		let locationDropOff = document.getElementById("locationDropOff");
+            		let datePickUp = document.getElementById("datePickUp");
+            		let dateDropOff = document.getElementById("dateDropOff");
+            		period.innerHTML = cart.period;
+            		locationPickUp.innerHTML = cart.locationPickUp;
+            		locationDropOff.innerHTML = cart.locationDropOff;
+            		datePickUp.innerHTML = cart.datePickUp;
+            		dateDropOff.innerHTML = cart.dateDropOff;
+*/
+/*			} // if 200
+		} //if 4
+	};
+    request.send(null);	
+	*/
 	getData("info");
 	
 }
@@ -94,7 +116,7 @@ function showTable(request){
         cell.innerHTML = parsedJSON.datePickUp; 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON.dateDropOff;     
-
+//	document.getElementById("middle").style.display = "block";
 }
 
 function backToLocation(){

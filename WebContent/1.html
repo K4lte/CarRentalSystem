@@ -188,6 +188,7 @@
 					dropdown.options[0].disabled = true;
 					for (var i = 0; i < list.length; ++i) {
 						// Append the element to the end of Array list new Option(text, val)
+						//		dropdown[i+1] = new Option(list[i].city.cityName, list[i].id);
 						dropdown[i + 1] = new Option(list[i].location.city.cityName + ', ' + list[i].location.address, list[i].id);
 					} // cycle
 

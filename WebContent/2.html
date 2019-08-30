@@ -96,6 +96,7 @@ function showTable(request){
 	for (var i = 0; i < parsedJSON.length; i++) {
 		// creates a <table> element 
 		let table = document.createElement("table");
+		//table.setAttribute("border", "1px solid black");
 		table.setAttribute("id", "cars");
         let row = table.insertRow(0);
           let cell = document.createElement('th');          
@@ -176,6 +177,7 @@ function showTable(request){
 		buttonSelect.setAttribute('type', "submit");
 		buttonSelect.setAttribute('value', "Select");
 		buttonSelect.setAttribute('id', i);
+	//	buttonSelect.setAttribute('onclick', 'selectCar(' + i +')');
 		td.appendChild(buttonSelect);
 		
 		let hiddenId = document.createElement("input");
@@ -188,12 +190,13 @@ function showTable(request){
 		let form = document.createElement("form");
 		form.setAttribute('method',"POST");
 		form.setAttribute('action',"car_select");
+	//	form.setAttribute('action',"select");
 		form.appendChild(table);		
 		let br = document.createElement("br");
 		form.appendChild(br);
 		div.appendChild(form);
 	}	
-
+//	document.getElementById("middle").style.display = "block";
 }
 </script>
 

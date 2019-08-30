@@ -157,6 +157,11 @@ function initialize(){
 
 // Function to show all reservations with selected status. Part 1
 function showReservationByStatus() { 
+    //to empty DOM elements
+  /*  let div = document.getElementById("reservations");
+    while (div.firstChild) {
+        div.removeChild(div.firstChild);
+    }*/
     var action = "reservation_monitoring";   
     let statusOnShow = document.getElementById("showReservationsSelect");
     statusMonitoringId = statusOnShow.options[statusOnShow.selectedIndex].value;

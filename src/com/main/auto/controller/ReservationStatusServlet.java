@@ -73,13 +73,29 @@ public class ReservationStatusServlet extends HttpServlet {
 		List<ReservationStatus> list = statusDAO.getAll();
 		
 		// Convert Java object to JSON format and returned as JSON formatted String
+		
+	/*	String json = gson.toJson(list);
+
+		response.setContentType("application/json");
+	    response.setCharacterEncoding("UTF-8");
+	    response.getWriter().write(json);	*/
 		sendJson(list, response);
 	}
 	
 	private void showMatchedStatusList(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		
 		int id = Integer.valueOf(request.getParameter("statusId"));
-		List<ReservationStatus> list = statusDAO.getStatusMatchedById(id);	
+		List<ReservationStatus> list = statusDAO.getStatusMatchedById(id);
+		
+		// Convert Java object to JSON format and returned as JSON formatted String
+		
+		/*String json = gson.toJson(list);
+
+		response.setContentType("application/json");
+	    response.setCharacterEncoding("UTF-8");
+	    response.getWriter().write(json);
+		*/
+		
 		sendJson(list, response);
 	}	
 	

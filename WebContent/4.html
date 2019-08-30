@@ -105,6 +105,7 @@ function setCardType(dropdown) {
             	var list = JSON.parse(request.responseText);
             	for (var i = 0; i < list.length; ++i) 
         		{
+            		//list.options[0] = new Option('--Select--', '');
         			// Append the element to the end of Array list new Option(text, val)
         			dropdown[i] = new Option(list[i].name, list[i].id);
         		} // cycle
