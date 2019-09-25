@@ -1,42 +1,46 @@
 package com.main.auto.controller;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.main.auto.service.ConfigurationManager;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.main.auto.dao.ClientDAO;
+import com.google.gson.GsonBuilder;
 import com.main.auto.dao.DAOFactory;
 import com.main.auto.dao.DBType;
-import com.main.auto.dao.EmployeeUserDAO;
+import com.main.auto.dao.daoInterfaces.ClientDAO;
+import com.main.auto.dao.daoInterfaces.EmployeeUserDAO;
 import com.main.auto.model.Client;
 import com.main.auto.model.EmployeeUser;
 import com.main.auto.service.ReservationCart;
+import com.main.auto.service.Util;
 
 /**
  * Servlet implementation class LoginServlet
  */
-@WebServlet(urlPatterns = {"/login"})
+@WebServlet(urlPatterns = {"/login",
+							"/isLoggedUser",
+							"/getLoggedInCient"})
 
 public class LoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(LoginServlet.class.getName());
 	private ClientDAO clientDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getClientDAO();
 	private EmployeeUserDAO adminDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getEmployeeUserDAO();
-	private Gson gson = new Gson();   
+	private Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();   
        
     public LoginServlet() {
         super();
-
     }
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -44,54 +48,51 @@ public class LoginServlet extends HttpServlet {
 		try {
 			chooseAction(action, request, response);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.log(Level.ERROR, "Exception: ", e);
 		}
 	}
 
 	private void chooseAction(String action, HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException
-	{
-		
+	{		
 		switch (action) {
 		case "/login":
 			checkLogin(request, response);
 			break;
-		case "/is_authorized":
-			isAuthorized(request, response);
+		case "/isLoggedUser":
+			isLoggedUser(request, response);
+			break;
+		case "/getLoggedInCient":
+			getLoggedInCient(request, response);
 			break;
 		}
 	} // chooseAction()
  
 	private void checkLogin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// Get login and password from login.html
 		String login = request.getParameter("login");
 		String password = request.getParameter("password");
-		String role = request.getParameter("role");
+		String role = request.getParameter("role");	
+		String errMsg = (String) request.getAttribute("errMsg");
 		
-		PrintWriter out=response.getWriter();
-		
-		HttpSession session = request.getSession();
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		// "no-cache" - Forces caches to obtain a new copy of the page from the origin server
-        // "no-store" - Directs caches not to store the page under any circumstance
-        // "must-revalidate" - A cache must not use the response to satisfy subsequent requests for this resource without successful validation on the origin server
-        httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-        httpResponse.setHeader("Pragma", "no-cache"); //HTTP 1.0 backward compatibility
-        httpResponse.setDateHeader("Expires", 0);  //Causes the proxy cache to see the page as "stale"
-        
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+		    session = request.getSession();
+		} 		
 		// Check if user has entered login and password
-		if(login!="" && password!="") {
+		if(errMsg == null) {
 			switch (role) {
 			case "admin":
 				EmployeeUser admin = adminDAO.login(login, password);
-				if (admin != null) {					
+				if (admin.getPermission() != null) {					
 					session.setAttribute("isAuthorized", true);
 					session.setAttribute("isAdmin", true);
 					response.getWriter().write("true");
+				} else {
+					invalidLogPass(request, response);
 				}
 				break;			
 			case "client":
 				Client user = clientDAO.login(login, password);
-				if (user != null) {
+				if (user.getPermission() != null) {
 					session.setAttribute("isAuthorized", true);
 		            session.setAttribute("isAdmin", false);
 		            ReservationCart cart = (ReservationCart) session.getAttribute("cart");
@@ -101,36 +102,57 @@ public class LoginServlet extends HttpServlet {
 		            }
 		            cart.setClient(user);
 		            response.getWriter().write("true");
-				} 
+				} else {
+					invalidLogPass(request, response);
+				}
 				break;
-			default:
-				response.getWriter().write("Either login or password is wrong");
 			}		
 		} else {
-			response.getWriter().write("Please enter login and password");
+			response.getWriter().write(errMsg);
 		}
 	} // checkLogin()
 
-	private void isAuthorized(HttpServletRequest request, HttpServletResponse response) throws IOException {
+	private void isLoggedUser(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String user = null;
 		HttpSession session = request.getSession(false);
-		boolean isAuthorized = (boolean) session.getAttribute("isAuthorized");
-		boolean isAdmin = (boolean) session.getAttribute("isAdmin");
-		
-		if (isAuthorized && !isAdmin) {
-			ReservationCart cart = (ReservationCart) session.getAttribute("cart");		
-		    			
-			JsonElement jsonElement = gson.toJsonTree(cart.getClient());		    
-		    if (cart.getDamage()!=null && cart.getReservation()!=null) {    	
-		    	jsonElement.getAsJsonObject().addProperty("carDamage", gson.toJson(cart.getDamage()));
-		    } else {
-		    	if (cart.getCar() != null) {    	
-			    	jsonElement.getAsJsonObject().addProperty("car", gson.toJson(cart.getCar()));
-		    	}
-		    }		    
-		    response.setCharacterEncoding("UTF-8");
-		    response.getWriter().write(gson.toJson(jsonElement));
+		if (session == null) {
+		    session = request.getSession();
+		    user = "none";
+		} else {
+		    // Already created			
+			Boolean isAuthorized = (Boolean) session.getAttribute("isAuthorized");
+			Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+			if (isAuthorized != null && isAdmin != null) {
+				if (isAuthorized && !isAdmin) {
+					user = "client";
+				} else {
+					if (isAuthorized && isAdmin) {
+						user = "admin";
+				}
+					
+				} 
+			} else {
+				user = "none";
+			}
 		}
-		
-	} // isAuthorized()
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			response.getWriter().write(user);
+	} // isLoggedUser()
 	
+	private void getLoggedInCient(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		HttpSession session = request.getSession(false);
+		ReservationCart cart = (ReservationCart) session.getAttribute("cart");
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		String client = gson.toJson(cart.getClient());
+		response.getWriter().write(client);
+	} //getLoggedInCient()
+
+	private void invalidLogPass(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		String locale = Util.getLocale(request);
+		String property = locale.equals("ru") ? "errMsg_locale_ru" : "errMsg_locale_en";
+		response.getWriter().write(ConfigurationManager.getProperty(property, "loginForm"));
+	}
+
 } // LoginServlet

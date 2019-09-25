@@ -10,11 +10,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.main.auto.dao.DAOFactory;
 import com.main.auto.dao.DBType;
-import com.main.auto.dao.ReservationStatusDAO;
+import com.main.auto.dao.daoInterfaces.ReservationStatusDAO;
 import com.main.auto.model.ReservationStatus;
 
 /**
@@ -24,34 +27,21 @@ import com.main.auto.model.ReservationStatus;
 							"/reservation_status_matched"})
 public class ReservationStatusServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(ReservationStatusServlet.class.getName());
 	private Gson gson = new GsonBuilder().create();    
 	private ReservationStatusDAO statusDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getReservationStatusDAO();
-	//private ReservationStatusCombsDAO statusCombsDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getReservationStatusCombsDAO();
        
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
     public ReservationStatusServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-	}
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = request.getServletPath();
 		try {
 			chooseAction(action, request, response);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.log(Level.ERROR, "Exception: ", e);
 		}		
 	}
 
@@ -99,7 +89,7 @@ public class ReservationStatusServlet extends HttpServlet {
 		sendJson(list, response);
 	}	
 	
-	private <T> void sendJson(T data, HttpServletResponse response) throws IOException {
+	private void sendJson(List<ReservationStatus> data, HttpServletResponse response) throws IOException {
 		String json = gson.toJson(data);
 
 		response.setContentType("application/json");

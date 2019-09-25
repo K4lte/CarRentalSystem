@@ -1,17 +1,204 @@
-th, td, p, input {
-    font:14px Verdana;
-}
-table, th, td 
-{
-    border: solid 1px #DDD;
-    border-collapse: collapse;
-    padding: 2px 3px;
-    text-align: center;
-}
-th {
-    font-weight:bold;
+body {
+	padding-top: 80px;
+	padding-bottom: 40px;
+	font-family: Verdana;
+	font-size: 14px;
 }
 
-.hidden {display:none}
+.container {
+	width: 100%;
+	margin: 80px auto;
+	/* Center the DIV horizontally */
+	text-align: center;
 
-body {padding: 0; margin: 0;}
+}
+
+.fixed-header,
+.fixed-footer {
+	width: 100%;
+	position: fixed;
+	background: #204055;
+	padding: 10px 0;
+	color: #fff;
+	left: 0;
+}
+
+.fixed-header {
+	top: 0;
+	height: 85px;
+}
+
+.fixed-footer {
+	bottom: 0;
+}
+
+   
+.fixed-header p {
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.menu {
+	height: 35px;
+	position: relative;
+	overflow: hidden;
+}
+
+
+/*.main {
+	background-color: #2196F3;
+	display: inline-block;
+	padding: 1px 8px;
+	height: 100%;
+	line-height: 100%;
+	width: 20%;
+}*/
+
+input[type=button] {
+	background-color: #4CAF50;
+	color: rgb(228, 228, 228);
+	padding: 10px 30px;
+	margin: 2px 2px;
+	border: none;
+	cursor: pointer;
+}
+
+
+.buttons {
+/*	display: inline-block;*/
+	padding: 10px 24px;
+	height: 100%;
+	line-height: 100%;
+	float: right;
+	margin: 2px;
+}
+
+input[type=text], input[type=password] {
+    width: 250px;
+    padding: 5px 10px;
+    margin: 2px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 500px;
+    background-color: #52af2b;
+    color: white;
+    padding: 15px 20px;
+    margin: 2px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/*
+input[type=button]:hover {
+    background-color: #ff8040;
+}
+*/
+button {
+	background-color: #4CAF50; /* Green */
+	border: none;
+	color: white;
+	padding: 15px 32px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	cursor: pointer;
+}
+
+button:hover {
+  background-color: #ff8040; /* Green */
+  color: white;
+}
+
+label {
+	text-decoration: none;
+	display: inline-block;	
+}
+
+.labelForm{
+	display: block;
+	margin-bottom: 5px;
+}
+
+#errorMsg{
+	text-align:center; 
+	color: rgba(255, 0, 0, 0.712);
+}
+
+select {
+	border: none;
+	padding: 5px 10px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	margin: 4px 2px;
+	cursor: pointer;
+	font: verdana;
+	font-size: 14px;
+}
+
+.holderInCenter{
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+
+table {
+	/*margin-left: auto;
+	margin-right: auto;*/
+}
+
+.optionSelect{
+	background: #204055;
+	height: 50px;
+	width: 100%;
+	overflow: hidden;
+	position: fixed;
+	display: inline-block;
+	margin: 17px auto;
+	text-align: center;
+	left:0;
+  }
+  
+  #reservations, #available, table{
+	float: center;
+    margin: 0 auto;
+  }
+
+  .locale {
+    position: absolute;
+    top: 8px;
+  	left: 16px;
+  }
+
+ .form {
+    width: 300px;
+    background: #fff;
+    padding: 15px 30px 30px;
+    border: 1px solid #ccc;
+    margin: 30px auto 0;
+    border-radius: 5px;
+}
+
+
+.form-inline {
+    border: 1px solid #ccc;
+    padding: 8px 10px 4px;
+    border-radius: 2px;
+}
+.form-inline label, .form-inline input {
+    display: inline-block;
+    width: auto;
+    padding-right: 100px;
+}
+
+.error {
+    color: red;
+    font-size: 90%;
+}

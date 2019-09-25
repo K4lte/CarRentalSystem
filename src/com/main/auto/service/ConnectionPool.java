@@ -14,7 +14,8 @@ public class ConnectionPool {
     private final String user = ConfigurationManager.getProperty("connection_db", "db.user");
     private final String password = ConfigurationManager.getProperty("connection_db", "db.password");
     private final static int DB_MAX_CONNECTION = 15;
-    public List<Connection> availableConnections = new ArrayList<>(DB_MAX_CONNECTION);
+    //public List<Connection> availableConnections = new ArrayList<>(DB_MAX_CONNECTION);
+    private List<Connection> availableConnections = new ArrayList<>(DB_MAX_CONNECTION);
 
     private ConnectionPool() {
         initializeConnectionPool();
@@ -55,4 +56,6 @@ public class ConnectionPool {
     public synchronized static ConnectionPool getInstance() {
     	return instance;
     }
+    
+    
 }

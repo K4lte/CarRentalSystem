@@ -1,98 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<link rel="stylesheet" href="style/modal.css" type="text/css"/>
-    <link href="style/style0.css" rel="stylesheet">
-    
-<style>
-#reservations {
-  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 70%;
-}
-
-#reservations td, #reservations th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#reservations tr:nth-child(even){background-color: #f2f2f2;}
-
-#reservations tr:hover {background-color: #ddd;}
-
-#reservations th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #52af2b;
-  color: white;
-  }
-
-  input[type=button] {
-			background-color: #4CAF50;
-			color: white;
-			padding: 14px 20px;
-			margin: 2px 0;
-			border: none;
-			cursor: pointer;
-
-		}
-
-  div {
-			margin: 0 auto;
-            border-radius: 5px;
-            padding: 10px;
-
-        }
-
-table {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.holderInCenter{ 
-			text-align: center; 
-			}
-</style>
-
     <meta charset="UTF-8">
-    <title>Rental Cars</title>
-    <meta name="keywords" content="" />
-    <meta name="description" content="" />
-    <link href="style/style0.css" rel="stylesheet">
+    <title>Car Rental System</title>
+              
+    <link rel="stylesheet" href="style/modal.css" type="text/css" />
+    <link rel="stylesheet" href="style/style.css" type="text/css" />
+    <link rel="stylesheet" href="style/cars.css" type="text/css" />
+              
 </head>
 <body onload='warning()'>
+    <div class="fixed-header">
+        <p id="header-caption">Car Rental System</p>
 
-<div class="wrapper">
-
-    <header class="header">
-        <div class="holderInCenter">
-            <input type="button" value="Show Reservations" onclick="showAllReservations()">
-            <input type="button" value="Search for a car" onclick="search()">
-
+        <form>
+			<select class="locale" name="locale" id="locale" onchange="reload()">
+	            <option selected disabled>--Language--</option>
+	            <option value="en">English</option>
+	            <option value="ru">Русский</option>
+	        </select>
+        </form>
+        
+        <div class="menu">
+        
+            <div id="main">
+                <button class="buttons" id="search-car-button" onclick="search()">Search for a car</button>
+                <button class="buttons" id="login-logout-button" onclick="logout()">Log Out</button>
+            </div>       
         </div>
-    </header><!-- .header-->
+    </div>
+    
+    <div class="optionSelect">
+       	<button id="reservation-button" onclick="showAllReservations()">Show Reservations</button>
+    </div>
 
-   
-    <div class="middle" id="middle">
+
+    <div class="container">
         <br>
         <div id="reservations"></div>
+    </div>
 
-            
-    </div><!-- .middle-->
-
-</div><!-- .wrapper -->
-
-
-
-
-<footer class="footer">
-    <strong>Footer:</strong>
-</footer><!-- .footer -->
-
+    <div class="fixed-footer">
+        <div id="footer-caption">Have a nice trip</div>     
+    </div>
 </body>
 
 <script type="text/javascript" src="js/common.js" defer></script>
+<script type="text/javascript" src="js/localization.js" defer></script>
 
 <script type="text/javascript">
 var parsedJSON;
@@ -101,16 +55,17 @@ var action = "reservation_client_monitoring";
 var actionWarning = "reservation_client_warning";
 
 function showAllReservations(){
-        //to empty DOM elements
     clear();
     showReservations(action);
 }
 
 function warning(){
+	setLocalization();
+	setButtonLoginLogout("logout");
     showReservations("reservation_client_warning");
 }
 
-// Function to show all reservations with selected status. Part 1
+// Function to show all reservations
 function showReservations(action) { 
     var request = CreateRequest();
     request.open("POST", action, true); 
@@ -137,51 +92,52 @@ function showReservationTable(request){
 		let table = document.createElement("table");
 		//table.setAttribute("border", "1px solid black");
 		table.setAttribute("id", "reservation" + i);
+		table.setAttribute("class", "reservations");
         let row = table.insertRow(0);
         let th = document.createElement('th');
         th.setAttribute("colspan", "2");
-        th.innerHTML = "Number: " + parsedJSON[i].uniqueNumber;         
+        th.innerHTML = setElementText("car-number-caption") + parsedJSON[i].uniqueNumber;         
         row.appendChild(th);
    		// 1st row
         row = table.insertRow(1);  
         cell = row.insertCell(0);
-        cell.innerHTML = "Car"; 
+        cell.innerHTML = setElementText("car-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].car.brand.brandName + " " + parsedJSON[i].car.model; 
         // 2nd row
         row = table.insertRow(2); 
         cell = row.insertCell(0);
-        cell.innerHTML = "Client"; 
+        cell.innerHTML = setElementText("client-caption");; 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].client.lastName + " " + parsedJSON[i].client.firstName; 
         // 3th row           
         row = table.insertRow(3);
         cell = row.insertCell(0);
-        cell.innerHTML = "Pick Up Date"; 
+        cell.innerHTML = setElementText("pick-up-date-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].pickUpDate; 
         // 4th row
         row = table.insertRow(4);
         cell = row.insertCell(0);
-        cell.innerHTML = "Drop Off Date"; 
+        cell.innerHTML = setElementText("drop-off-date"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].returnDate; 
         // 5th row
         row = table.insertRow(5);
         cell = row.insertCell(0);
-        cell.innerHTML = "Pick Up Location"; 
+        cell.innerHTML = setElementText("pick-up-location-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].pickUpLocation.location.city.cityName + ", " + parsedJSON[i].pickUpLocation.location.address; 
         // 6th row
         row = table.insertRow(6);
         cell = row.insertCell(0);
-        cell.innerHTML = "Drop Off Location"; 
+        cell.innerHTML = setElementText("drop-off-location-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].returnLocation.location.city.cityName + ", " + parsedJSON[i].returnLocation.location.address;     
         // 7th row
 		row = table.insertRow(7);
 		cell = row.insertCell(0);
-		cell.innerHTML = "Status";
+		cell.innerHTML = setElementText("status");
 		cell = row.insertCell(1);
         let status = parsedJSON[i].status.statusName;
         cell.innerHTML = status;
@@ -198,7 +154,7 @@ function showReservationTable(request){
             // create a button
             let buttonPay = document.createElement("input");
             buttonPay.setAttribute('type', "button");
-            buttonPay.setAttribute('value', "Pay");
+            buttonPay.setAttribute('value', setElementText("pay-button"));
             buttonPay.setAttribute('id', i);
             buttonPay.setAttribute('onclick', "pay(" + i + ")");
             td.appendChild(buttonPay);
@@ -234,7 +190,7 @@ function pay(jsonId){
         if (request.readyState == 4) {
             if (request.status == 200){
                 if (request.responseText == "Success")
-                window.location.href = "4.html";
+                window.location.href = "paymentPage.html";
             }
         }
     };
@@ -251,8 +207,27 @@ function clear(){
 }
 
 function search(){
-    window.location.href = "1.html";
+    window.location.href = "carSearchPage.html";
 }
+
+
+function logout(){
+		let action = "logout";
+		var request = CreateRequest();
+		request.open("POST", action, true);
+		//Send the proper header information along with the request
+	//	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		request.onreadystatechange = function () {
+			if (request.readyState == 4) {
+				if (request.status == 200) {
+					window.location.href = "carSearchPage.html";
+				} else {
+					document.write("Server's response " + request.status);
+				}
+			}
+		};
+		request.send(null);
+	}
 </script>
 
 </html>

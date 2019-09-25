@@ -1,0 +1,26 @@
+.cars, .reservations {
+	font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+	border-collapse: collapse;
+	width: 500px;
+  }
+  
+  .cars td, .cars th, .reservations td, .reservations th {
+	border: 1px solid #ddd;
+	padding: 8px;
+  }
+  
+  .cars, tr:nth-child(even), .reservations tr:nth-child(even){
+	  background-color: #f2f2f2;
+	}
+  
+  .cars tr:hover, .reservations tr:hover {
+	  background-color: #ddd;
+	}
+  
+  .cars th, .reservations th {
+	padding-top: 12px;
+	padding-bottom: 12px;
+	text-align: center;
+	background-color: #204055;
+	color: white;
+	}

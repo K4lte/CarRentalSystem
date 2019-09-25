@@ -12,20 +12,24 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.google.gson.Gson;
-import com.main.auto.dao.CarDamageDAO;
-import com.main.auto.dao.CityDAO;
-import com.main.auto.dao.ClientDAO;
-import com.main.auto.dao.ReservationStatusDAO;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.main.auto.dao.daoInterfaces.CarDamageDAO;
+import com.main.auto.dao.daoInterfaces.ClientDAO;
+import com.main.auto.dao.daoInterfaces.CreditCardTypeDAO;
+import com.main.auto.dao.daoInterfaces.OfficeDAO;
+import com.main.auto.dao.daoInterfaces.PaymentDAO;
+import com.main.auto.dao.daoInterfaces.PermissionDAO;
+import com.main.auto.dao.daoInterfaces.ReservationDAO;
+import com.main.auto.dao.daoInterfaces.ReservationStatusDAO;
 import com.main.auto.dao.DAOFactory;
 import com.main.auto.dao.DBType;
-import com.main.auto.dao.OfficeDAO;
-import com.main.auto.dao.PaymentDAO;
-import com.main.auto.dao.PermissionDAO;
-import com.main.auto.dao.CreditCardTypeDAO;
-import com.main.auto.dao.ReservationDAO;
 import com.main.auto.model.Payment;
 import com.main.auto.model.Reservation;
 import com.main.auto.service.ReservationCart;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * Servlet implementation class SearchServlet
@@ -35,28 +39,24 @@ import com.main.auto.service.ReservationCart;
 							"/booking"})
 public class BookingServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(BookingServlet.class.getName());
        
     public BookingServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String action = request.getServletPath();
 		try {
 			chooseAction(action, request, response);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.log(Level.ERROR, "Exception: ", e);
 		}
-	}
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
 	}
 
 	private void chooseAction(String action, HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException
 	{
-		
 		switch (action) {
 		case "/search":
 			searchCar(request, response);
@@ -68,59 +68,72 @@ public class BookingServlet extends HttpServlet {
 			selectPaymentType(request, response);
 			break;
 		default:
-			response.sendRedirect("1.html");
+			response.sendRedirect("carSearchPage.html");
 			break;
 		}
 	} // chooseAction()
 	
 	private void searchCar(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		String errMsg = (String) request.getAttribute("errMsg");
+		if(errMsg == null) {
 		// location = office
-		int selectedPickUpLocationId = Integer.valueOf(request.getParameter("pickUpLocation"));
-		int selectedDropOffLocationId = Integer.valueOf(request.getParameter("dropOffLocation"));
-		Date selectedPickUpDate = Date.valueOf(request.getParameter("pickUpDate"));
-		Date selectedDropOffDate = Date.valueOf(request.getParameter("dropOffDate"));
-		
-		HttpSession httpSession = request.getSession();
-		ReservationCart cart = (ReservationCart) httpSession.getAttribute("cart");
-        if (cart == null) {
-        	cart = new ReservationCart();
-    		httpSession.setAttribute("cart", cart);
-        }
-		OfficeDAO officeDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getOfficeDAO();
-		cart.setLocationPickUp(officeDAO.getById(selectedPickUpLocationId));
-		cart.setLocationDropOff(officeDAO.getById(selectedDropOffLocationId));
-		cart.setDatePickUp(selectedPickUpDate);
-		cart.setDateDropOff(selectedDropOffDate);		
-		response.sendRedirect("2.html");
+			int selectedPickUpLocationId = Integer.valueOf(request.getParameter("pickUpLocation"));
+			int selectedDropOffLocationId = Integer.valueOf(request.getParameter("dropOffLocation"));
+			Date selectedPickUpDate = Date.valueOf(request.getParameter("pickUpDate"));
+			Date selectedDropOffDate = Date.valueOf(request.getParameter("dropOffDate"));
+			
+			HttpSession session = request.getSession(false);
+			if (session == null) {
+			    session = request.getSession();
+			} 		
+			ReservationCart cart = (ReservationCart) session.getAttribute("cart");
+	        if (cart == null) {
+	        	cart = new ReservationCart();
+	    		session.setAttribute("cart", cart);
+	        }
+			OfficeDAO officeDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getOfficeDAO();
+			cart.setLocationPickUp(officeDAO.getById(selectedPickUpLocationId));
+			cart.setLocationDropOff(officeDAO.getById(selectedDropOffLocationId));
+			cart.setDatePickUp(selectedPickUpDate);
+			cart.setDateDropOff(selectedDropOffDate);		
+		} else {
+			response.getWriter().write(errMsg);
+		}
 	}
 	
 	
 	private void getInfo(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		HttpSession httpSession = request.getSession();
-		ReservationCart cart = (ReservationCart) httpSession.getAttribute("cart");
+		HttpSession session = request.getSession(false);
+		ReservationCart cart = (ReservationCart) session.getAttribute("cart");
         // Convert Java object to JSON format and returned as JSON formatted String
 		Gson gson = new Gson();
 		String json = gson.toJson(cart);
 	    response.setCharacterEncoding("UTF-8");
-	    response.getWriter().write(json);	
+	    response.getWriter().write(json);
+		cart.clearPaymentData();
 	}	
 	
 	private void selectPaymentType(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		HttpSession httpSession = request.getSession();
-		ReservationCart cart = (ReservationCart) httpSession.getAttribute("cart");
-		
-		if (cart.getDamage()!=null && cart.getReservation()!=null) {    	
-	    	payDamage(request, response);
-	    } else {
-	    	if (cart.getCar() != null) {    	
-	    		bookCar(request, response);
-	    	}
-	    }		    
+		String errorMsg = (String) request.getAttribute("errMsg");		
+		if(errorMsg == null) {				
+			HttpSession session = request.getSession(false);
+			ReservationCart cart = (ReservationCart) session.getAttribute("cart");
+			
+			if (cart.getDamage()!=null && cart.getReservation()!=null) {    	
+		    	payDamage(request, response);
+		    } else {
+		    	if (cart.getCar() != null) {    	
+		    		bookCar(request, response);
+		    	}
+		    }	
+		} else {
+			response.getWriter().write(errorMsg);
+		}
 	}
 	
 	private void payDamage(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		HttpSession httpSession = request.getSession();
-		ReservationCart cart = (ReservationCart) httpSession.getAttribute("cart");
+		HttpSession session = request.getSession(false);
+		ReservationCart cart = (ReservationCart) session.getAttribute("cart");
 		
 		Integer creditCardTypeId = Integer.valueOf(request.getParameter("creditCardType"));
 		String creditCardNumber = request.getParameter("creditCardNumber");
@@ -128,7 +141,9 @@ public class BookingServlet extends HttpServlet {
 		PaymentDAO paymentDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getPaymentDAO();
 		CreditCardTypeDAO cardTypeDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getCreditCardTypeDAO();		
 		CarDamageDAO damageDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getCarDamageDAO();
-			
+		ReservationDAO reservationDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getReservationDAO();
+		ReservationStatusDAO statusDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getReservationStatusDAO();
+		
 		// Add new payment to Data Base
 		Payment payment = new Payment();	
 		payment.setCreditCardType(cardTypeDAO.getById(creditCardTypeId));
@@ -138,17 +153,15 @@ public class BookingServlet extends HttpServlet {
 		payment.setId(paymentDAO.add(payment));
 		cart.getDamage().setPayment(payment);
 		damageDAO.edit(cart.getDamage());
-		httpSession.removeAttribute("cart");
-		response.sendRedirect("7.html");	
-		
+		reservationDAO.changeStatus(statusDAO.getByStatus("damage paid").getId(), cart.getReservation().getId());		
 	}
 
 	
 	private void bookCar(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		Integer creditCardTypeId = Integer.valueOf(request.getParameter("creditCardType"));
+		int creditCardTypeId = Integer.valueOf(request.getParameter("creditCardType"));
 		String creditCardNumber = request.getParameter("creditCardNumber");
 
-		HttpSession httpSession = request.getSession();
+		HttpSession httpSession = request.getSession(false);
 
 		ClientDAO clientDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getClientDAO();
 		ReservationDAO reservationDAO = DAOFactory.getDAOFactory(DBType.MYSQL).getReservationDAO();
@@ -159,7 +172,7 @@ public class BookingServlet extends HttpServlet {
 		
 		ReservationCart cart = (ReservationCart) httpSession.getAttribute("cart");
 		if (cart.getClient().getPermission().getRole().equals("guest")) {
-			// change permission to 3 (user)
+			// change permission from "guest" to "user"
 			cart.getClient().setPermission(permissionDAO.getByPermissionRole("user"));
 			int id = clientDAO.add(cart.getClient());
 			cart.getClient().setId(id);
@@ -183,9 +196,7 @@ public class BookingServlet extends HttpServlet {
 		payment.setTotalAmount(cart.getTotalRental());
 		payment.setReservation(reservation);
 		paymentDAO.add(payment);
-		
-		httpSession.removeAttribute("cart");
-		response.sendRedirect("5.html");		
+	
 	}
 	
 }

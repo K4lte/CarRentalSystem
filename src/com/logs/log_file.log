@@ -1,0 +1,32 @@
+2019-09-03 19:14:02 INFO  ClientDAOMySQL:84 - Field was saved
+
+2019-09-03 19:14:02 INFO  ReservationDAOMySQL:77 - Field was saved
+
+2019-09-03 19:14:02 DEBUG ReservationDAOMySQL:78 - Reservation{id=0, uniqueNumber='Hhhh11', car=1G4CU541024620405, client=Hhhh Ghjhj, pickUpDate=2019-09-03, returnDate=2019-09-11, pickUpLocation=Tazz, returnLocation=Stark, status=Confirmation{id=1, status='open'}, note='null'}
+
+2019-09-03 19:14:02 INFO  PaymentDAOMySQL:81 - Field was saved
+
+2019-09-03 19:14:54 INFO  ReservationDAOMySQL:35 - Field was saved
+
+2019-09-03 20:15:38 INFO  ClientDAOMySQL:84 - Field was saved
+
+2019-09-03 20:15:38 INFO  ReservationDAOMySQL:77 - Field was saved
+
+2019-09-03 20:15:38 DEBUG ReservationDAOMySQL:78 - Reservation{id=0, uniqueNumber='Er11', car=JN1CV6EKXEM213925, client=Er Qw, pickUpDate=2019-09-03, returnDate=2019-09-04, pickUpLocation=Corkery, returnLocation=Stark, status=Confirmation{id=1, status='open'}, note='null'}
+
+2019-09-03 20:15:38 INFO  PaymentDAOMySQL:81 - Field was saved
+
+2019-09-03 21:00:51 INFO  ClientDAOMySQL:84 - Field was saved
+
+2019-09-03 21:00:51 INFO  ReservationDAOMySQL:77 - Field was saved
+
+2019-09-03 21:00:52 DEBUG ReservationDAOMySQL:78 - Reservation{id=0, uniqueNumber='Gvfhj11', car=SCBDC4BL8AC652200, client=Gvfhj Otrttrrtrt, pickUpDate=2019-09-03, returnDate=2019-09-05, pickUpLocation=Stark, returnLocation=Stark, status=Confirmation{id=1, status='open'}, note='null'}
+
+2019-09-03 21:00:52 INFO  PaymentDAOMySQL:81 - Field was saved
+
+2019-09-03 21:02:05 INFO  ReservationDAOMySQL:35 - Field was saved
+
+2019-09-03 21:02:13 INFO  ReservationDAOMySQL:35 - Field was saved
+
+2019-09-03 21:02:42 INFO  ReservationDAOMySQL:35 - Field was saved
+

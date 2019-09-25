@@ -22,7 +22,7 @@ public class Client {
     //    Field for client's phone number
     private String phoneNumber;
     //    Field for client's email
-    private String emailAddress;
+    private String email;
  //   private String login;
     private String password;
     private Permission permission;
@@ -61,7 +61,7 @@ public class Client {
                 ", Driver License Number: '" + driverLicenseNumber + '\'' +
                 ", Birth Date: " + birthDate +
                 ", Phone Number: '" + phoneNumber + '\'' +
-                ", email Address: '" + emailAddress + '\'' +
+                ", email Address: '" + email + '\'' +
   //              ", login: '" + login + '\'' +
                 ", password: '" + password + '\'' +
                 ", permission: '" + permission + '\'' +
@@ -124,12 +124,12 @@ public class Client {
         this.phoneNumber = phoneNumber;
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getEmail() {
+        return email;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
  /*   public String getLogin() {

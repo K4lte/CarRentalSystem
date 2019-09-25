@@ -1,11 +1,34 @@
 package com.main.auto.dao;
 
+import com.main.auto.dao.daoInterfaces.AccessoryDAO;
+import com.main.auto.dao.daoInterfaces.AccessoryTypeDAO;
+import com.main.auto.dao.daoInterfaces.CarBrandDAO;
+import com.main.auto.dao.daoInterfaces.CarCategoryDAO;
+import com.main.auto.dao.daoInterfaces.CarColorDAO;
+import com.main.auto.dao.daoInterfaces.CarDAO;
+import com.main.auto.dao.daoInterfaces.CarDamageDAO;
+import com.main.auto.dao.daoInterfaces.CarTransmissionDAO;
+import com.main.auto.dao.daoInterfaces.CityDAO;
+import com.main.auto.dao.daoInterfaces.ClientDAO;
+import com.main.auto.dao.daoInterfaces.CountryDAO;
+import com.main.auto.dao.daoInterfaces.CreditCardTypeDAO;
+import com.main.auto.dao.daoInterfaces.DamageTypeDAO;
+import com.main.auto.dao.daoInterfaces.EmployeeUserDAO;
+import com.main.auto.dao.daoInterfaces.LocationDAO;
+import com.main.auto.dao.daoInterfaces.OfficeDAO;
+import com.main.auto.dao.daoInterfaces.PaymentDAO;
+import com.main.auto.dao.daoInterfaces.PermissionDAO;
+import com.main.auto.dao.daoInterfaces.ReservationDAO;
+import com.main.auto.dao.daoInterfaces.ReservationStatusCombsDAO;
+import com.main.auto.dao.daoInterfaces.ReservationStatusDAO;
+import com.main.auto.dao.daoMySQL.DAOFactoryMySQL;
+
 public abstract class DAOFactory {
 
     public static DAOFactory getDAOFactory(DBType whichFactory) {
         switch (whichFactory) {
             case MYSQL:
-                return new MySQLDAOFactory();
+                return new DAOFactoryMySQL();
             default:
                 return null;
         }

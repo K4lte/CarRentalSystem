@@ -5,7 +5,6 @@ import java.sql.Date;
 
 import com.main.auto.model.Car;
 import com.main.auto.model.CarDamage;
-import com.main.auto.model.City;
 import com.main.auto.model.Client;
 import com.main.auto.model.Office;
 import com.main.auto.model.Reservation;
@@ -13,8 +12,8 @@ import com.main.auto.model.Reservation;
 public class ReservationCart {
 	private Client client;
 	private Car car;
-	private City cityPickUp;
-	private City cityDropOff;
+/*	private City cityPickUp;
+	private City cityDropOff;*/
 
 	private Office locationPickUp;
 	private Office locationDropOff;
@@ -47,6 +46,18 @@ public class ReservationCart {
 		    	}
 		    }		   
 		return price;
+	}
+	
+	public void clearPaymentData() {
+		car = null;
+		locationPickUp = null;
+		locationDropOff = null;
+		datePickUp = null;
+		dateDropOff = null;
+		period = -1;
+		totalRental = null;
+		reservation = null;
+		damage = null;
 	}
 	
 	// getters & setters
@@ -103,7 +114,7 @@ public class ReservationCart {
 		this.period = period;
 	}
 
-	public City getCityDropOff() {
+/*	public City getCityDropOff() {
 		return cityDropOff;
 	}
 
@@ -118,7 +129,7 @@ public class ReservationCart {
 	public void setCityPickUp(City cityPickUp) {
 		this.cityPickUp = cityPickUp;
 	}
-
+*/
 	public Reservation getReservation() {
 		return reservation;
 	}

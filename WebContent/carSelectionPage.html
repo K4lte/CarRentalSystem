@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  
+  <title>Car Rental System</title>
+
+<link rel="stylesheet" href="style/modal.css" type="text/css" />
+<link rel="stylesheet" href="style/style.css" type="text/css" />
+<link rel="stylesheet" href="style/cars.css" type="text/css" />
+
+</head>
+
+<body onload='initialize()'>
+
+    <!-- Modal window-->
+	<div class="modal">
+			<h1 id="account-caption">ACCOUNT LOGIN</h1>
+			<div>
+				<table>
+					<tr>
+						<th id="login-email-caption">Login: </th>
+						<td><input type="text" name="login" id="login" size="30" class="cleaningform" placeholder="Your email.."></td>
+					</tr>
+					<tr>
+						<th id="password-caption">Password:</th>
+						<td><input type="password" name="password" id="password" size="30" class="cleaningform" placeholder="Your password.."></td>
+					</tr>
+				</table>
+				<div class="holderInCenter">
+					<input type="radio" name="role" id="roleAdmin" value="admin"/>
+					<label for="roleAdmin" id="role-admin-caption">Admin</label>	
+			
+					<input type="radio" name="role" id="roleClient" value="client"/>
+					<label for="roleClient" id="role-client-caption">Client</label>					
+				</div>
+				<div class="holderInCenter">
+					<button id="login-button" onclick="getLoginData()">Log In</button>	
+					<button id="cancel-button" onclick="cancel()"> Cancel</button>
+				</div>
+				<div id="BadLogin"></div>
+			</div>
+		</div>
+
+    <!-- Page-->
+
+    <div class="fixed-header">
+        <p id="header-caption">Car Rental System</p>
+
+		<form>
+			<select class="locale" name="locale" id="locale" onchange="reload()">
+	            <option selected disabled>--Language--</option>
+	            <option value="en">English</option>
+	            <option value="ru">Русский</option>
+	        </select>
+        </form>
+
+        <div class="menu">
+            <div id="main">          
+				<button class="buttons" id="login-logout-button" onclick="openWin()">Log In</button>     
+				<button class="buttons" id="cabinet-button" onclick="showCabinet()" style="display:none">My Reservations</button> 
+	        </div>
+      </div>
+	</div>
+    
+  	<div class="container">
+		<b id="available-car-caption"> Available cars:</b>
+		<br>              
+		<div id="available"></div>
+		<div id="errorMsg"></div>
+  	</div>
+  
+	<div class="fixed-footer">
+		<div id="footer-caption">Have a nice trip</div>     
+	</div>
+
+</body>
+
+<script type="text/javascript" src="js/common.js" defer></script>
+<script type="text/javascript" src="js/localization.js" defer></script>
+
+<script type="text/javascript">
+
+function initialize(){
+	setLocalization();
+	isLoggedUser();
+    getCarData("car_search");
+}
+
+function getCarData(action) {
+	let request = CreateRequest();
+	request.open("POST", action, true); 
+   	request.onreadystatechange = function () {
+	if (request.readyState == 4) {
+            if (request.status == 200){
+              var parsedJSON = JSON.parse(request.responseText);
+              if (parsedJSON.errMsg != "false") {
+                showErrorMassage(parsedJSON.errMsg);		
+              } else {
+            	  showTable(JSON.parse(parsedJSON.cars));
+              }
+			}
+           else
+            {
+            	document.write("Server's response " + request.status);      
+            }
+        }
+    };
+    request.send(null);
+ }
+
+function showTable(cars){	
+	var div = document.getElementById("available");
+	
+	for (var i = 0; i < cars.length; i++) {
+		// creates a <table> element 
+		let table = document.createElement("table");
+		//table.setAttribute("border", "1px solid black");
+		table.setAttribute("id", "cars" + i);
+		table.setAttribute("class", "cars");
+        let row = table.insertRow(0);
+          let cell = document.createElement('th');          
+		//cell = row.insertCell(0);
+        cell.setAttribute("colspan", "2");
+        cell.innerHTML = cars[i].brand.brandName + " " + cars[i].model; 
+        
+           row.appendChild(cell);
+   		// 1st row
+        row = table.insertRow(1);  
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("category"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].category.typeName; 
+        // 2nd row
+        row = table.insertRow(2); 
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("year"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].productionYear; 
+        // 3rd row
+        row = table.insertRow(3); 
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("color"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].color.colorName; 
+        // 4th row           
+        row = table.insertRow(4);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("transmission"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].transmission.name; 
+        // 5th row
+        row = table.insertRow(5);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("number-of-seats"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].numberOfSeats; 
+        // 6th row
+        row = table.insertRow(6);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("number-of-suitcases"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].numberOfSuitcases; 
+        // 7th row
+        row = table.insertRow(7);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("air-conditioning"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].airConditioning; 
+        // 8th row
+        row = table.insertRow(8);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("rate-number"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].rateNumber; 
+        // 9th row
+        row = table.insertRow(9);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("rental-price"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].rentalPrice; 
+        // 10th row 
+        row = table.insertRow(10);
+        cell = row.insertCell(0);
+        cell.innerHTML = setElementText("total-rental"); 
+        cell = row.insertCell(1);
+        cell.innerHTML = cars[i].totalRental;       
+        
+        // 11th row        
+        row = table.insertRow(11);
+		let td = document.createElement('td');
+		td.setAttribute("colspan", "2");
+		td.setAttribute("align", "center");
+		row.appendChild(td);
+		//create a button
+		let buttonSelect = document.createElement("input");
+		buttonSelect.setAttribute('type', "submit");
+		buttonSelect.setAttribute('value', setElementText("select"));
+		buttonSelect.setAttribute('id', "car" + i);
+		td.appendChild(buttonSelect);
+		
+		let hiddenId = document.createElement("input");
+		hiddenId.setAttribute('type', "hidden");
+		hiddenId.setAttribute('name', "hiddenId");
+		hiddenId.setAttribute('value', cars[i].id);
+		table.appendChild(hiddenId);
+			
+		//create a form
+		let form = document.createElement("form");
+		form.setAttribute('method',"POST");
+		form.setAttribute('action',"car_select");
+		form.appendChild(table);		
+		let br = document.createElement("br");
+		form.appendChild(br);
+		div.appendChild(form);
+	}	
+}
+
+/*
+function showErrorMassage(text){
+        let errorMsg = document.getElementById("errorMsg");
+		errorMsg.innerText = text;	
+}
+
+function eraseErrorMassage(text){
+  let errorMsg = document.getElementById("errorMsg");
+	errorMsg.innerHTML = "";	
+}
+    
+function isLoggedUser(){
+	let	loggedInClient = false;
+	let action = "isLoggedUser";
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {					
+				if (request.responseText != "none" ){
+	        setButtonLoginLogout("logout");
+				} else {
+	        setButtonLoginLogout("login");
+	      }													
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(null);
+}
+*/
+</script>
+
+</html>
+

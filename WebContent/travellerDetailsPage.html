@@ -1,0 +1,228 @@
+l<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Rental System</title>
+           
+    <link rel="stylesheet" href="style/modal.css" type="text/css" />
+    <link rel="stylesheet" href="style/style.css" type="text/css" />
+            
+</head>
+
+<body onload='initialize()'>
+
+    <!-- Modal window-->
+	<div class="modal">
+			<h1 id="account-caption">ACCOUNT LOGIN</h1>
+			<div>
+				<table>
+					<tr>
+						<th id="login-email-caption">Login: </th>
+						<td><input type="text" name="login" id="login" size="30" class="cleaningform" placeholder="Your email.."></td>
+					</tr>
+					<tr>
+						<th id="password-caption">Password:</th>
+						<td><input type="password" name="password" id="password" size="30" class="cleaningform" placeholder="Your password.."></td>
+					</tr>
+				</table>
+				<div class="holderInCenter">
+					<input type="radio" name="role" id="roleAdmin" value="admin"/>
+					<label for="roleAdmin" id="role-admin-caption">Admin</label>	
+			
+					<input type="radio" name="role" id="roleClient" value="client"/>
+					<label for="roleClient" id="role-client-caption">Client</label>					
+				</div>
+				<div class="holderInCenter">
+					<button id="login-button" onclick="getLoginData()">Log In</button>	
+					<button id="cancel-button" onclick="cancel()"> Cancel</button>
+				</div>
+				<div id="BadLogin"></div>
+			</div>
+		</div>
+	
+     <!-- Page-->
+     <div class="fixed-header">
+		<p id="header-caption">Car Rental System</p>
+		
+		<form>
+			<select class="locale" name="locale" id="locale" onchange="setCookieLocale()">
+	            <option selected disabled>--Language--</option>
+	            <option value="en">English</option>
+	            <option value="ru">Русский</option>
+	        </select>
+        </form>
+
+        <div class="menu">
+
+            <div id="main">               
+				<button class="buttons" id="login-logout-button" onclick="openWin()">Log In</button>     
+				<button class="buttons" id="cabinet-button" onclick="showCabinet()" style="display:none">My Reservations</button> 
+	        </div>
+
+
+      </div>
+    </div>
+
+
+    <div class="container">             
+        <h3 id="traveller-details-caption">Client Form</h3>
+        <div class="form">
+            <label class="labelForm" for="FirstName" id="first-name-caption">First Name:</label>
+            <input type="text" id="FirstName" name="FirstName" placeholder="Your name..">
+			<div class="error" id="firstNameError"></div>
+
+            <label class="labelForm" for="LastName" id="last-name-caption">Last Name:</label>
+            <input type="text" id="LastName" name="LastName" placeholder="Your last name..">
+			<div class="error" id="lastNameError"></div>
+
+            <label class="labelForm" for="PassportNumber" id="passport-number-caption">Passport Number:</label>
+            <input type="text" id="PassportNumber" name="PassportNumber" class="cleaningform" placeholder="Your passport number..">
+			<div class="error" id="passportError"></div>
+			
+            <label class="labelForm" for="DriverLicenseNumber" id="driver-license-caption">Driver License Number:</label>
+            <input type="text" id="DriverLicenseNumber" name="DriverLicenseNumber" class="cleaningform" placeholder="Your driver license number..">
+			<div class="error" id="driverLicenseError"></div>
+			
+            <label class="labelForm" for="BirthDate" id="birth-date-caption">Birth Date:</label>
+            <input type="text" id="BirthDate" name="BirthDate" class="cleaningform" placeholder="YYYY-MM-DD">
+			<div class="error" id="birthdayError"></div>
+			
+            <label class="labelForm" for="PhoneNumber" id="phone-number-caption">Phone Number:</label>
+            + <input type="text" id="PhoneNumber" name="PhoneNumber" class="cleaningform" placeholder="111-111-1111">
+			<div class="error" id="phoneError"></div>
+
+            <label class="labelForm" for="Email" id="email-caption">Email Address:</label>
+            <input type="text" id="Email" name="Email" class="cleaningform">
+			<div class="error" id="emailError"></div>
+
+            <button id="confirm-next-button" onclick="getClientData()">Next</button>
+        	<div id="errorMsg"></div></p>
+         </div>
+    </div>
+    <!-- .container -->
+
+    <div class="fixed-footer">
+        <div id="footer-caption">Have a nice trip</div>    
+    </div>
+            
+</body>
+
+<script type="text/javascript" src="js/common.js" defer></script>
+<script type="text/javascript" src="js/localization.js" defer></script>
+<script type="text/javascript">
+var loggedInClient;
+
+function initialize(){
+	setLocalization();
+	isLoggedUser();
+}
+
+function isLoggedUser(){
+	loggedInClient = false;
+	let action = "isLoggedUser";
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {					
+				if (request.responseText == "admin"){
+					window.location.href = "adminPage.html";
+				} else {
+					if (request.responseText == "client"){
+						getLoggedInCient();
+						setButtonLoginLogout("logout");
+						loggedInClient = true;
+					} else {
+						if (request.responseText == "none"){
+							clearForm();
+							loggedInClient = false;
+							setButtonLoginLogout("login");
+						}
+					} 													
+				}
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(null);
+}
+
+function getLoggedInCient(){
+	let action = "getLoggedInCient";
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {					
+				setClientData(request);
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(null);
+}
+
+function setClientData(request){
+	let client = JSON.parse(request.responseText);
+	document.getElementById("FirstName").value = client.firstName;
+	document.getElementById("LastName").value = client.lastName;
+	document.getElementById("PassportNumber").value = client.passportNumber;
+	document.getElementById("DriverLicenseNumber").value = client.driverLicenseNumber;       
+	document.getElementById("BirthDate").value = client.birthDate;
+	document.getElementById("PhoneNumber").value = client.phoneNumber;
+	document.getElementById("Email").value = client.email;
+	let textList = document.querySelectorAll('input[type="text"]');
+	for (let i = 0; i < textList.length; i++){
+		textList[i].disabled = true;
+	}					        
+}
+
+function getClientData(){
+	let value;
+	let action = "client_details";
+
+	value = "FirstName=" + document.getElementById("FirstName").value;
+	value += "&LastName=" + document.getElementById("LastName").value;
+	value += "&PassportNumber=" + document.getElementById("PassportNumber").value;
+	value += "&DriverLicenseNumber=" + document.getElementById("DriverLicenseNumber").value;       
+	value += "&BirthDate=" + document.getElementById("BirthDate").value;
+	value += "&PhoneNumber=" + document.getElementById("PhoneNumber").value;
+	value += "&Email=" + document.getElementById("Email").value;              
+    sendClientData(action, value); 
+}
+					    
+function sendClientData(action, value){
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {
+				if (request.responseText != ""){
+					showErrorMassage(request);		
+				} else {
+					window.location.href = "paymentPage.html";
+				}		
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(value);
+}
+
+function clearForm(){
+	let inputs = document.querySelectorAll('input[type="text"]');
+	for (let i=0; i<inputs.length ; i++){
+		inputs[i].value = "";
+	}
+}
+    
+</script>
+
+</html>

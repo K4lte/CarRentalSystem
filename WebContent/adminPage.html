@@ -1,174 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-	<link rel="stylesheet" href="style/modal.css" type="text/css"/>
-    <link href="style/style0.css" rel="stylesheet">
-    
-<style>
-#reservations {
-  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 70%;
-}
-
-#reservations td, #reservations th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#reservations tr:nth-child(even){background-color: #f2f2f2;}
-
-#reservations tr:hover {background-color: #ddd;}
-
-#reservations th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #52af2b;
-  color: white;
-  }
-  
-#select {
-  background-color: #ff7f11;
-  border: none;
-  color: white;
-  padding: 5px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-
-table {
-	margin-left: auto;
-	margin-right: auto;
-}
-</style>
-
-    <meta charset="UTF-8">
-    <title>Rental Cars</title>
-    <meta name="keywords" content="" />
-    <meta name="description" content="" />
-    <link href="style/style0.css" rel="stylesheet">
+	<meta charset="UTF-8">
+	<title>Car Rental System</title>
+              
+	<link rel="stylesheet" href="style/modal.css" type="text/css" />
+	<link rel="stylesheet" href="style/style.css" type="text/css" />
+	<link rel="stylesheet" href="style/cars.css" type="text/css" />
 </head>
+              
 <body onload='initialize()'>
+    <div class="fixed-header">
+        <p id="header-caption">Car Rental System</p>
 
-<div class="modal">
-    <h1>Car's Damage</h1>
-    <form>
+        <form>
+			<select class="locale" name="locale" id="locale" onchange="reload()">
+	            <option selected disabled>--Language--</option>
+	            <option value="en">English</option>
+	            <option value="ru">Русский</option>
+	        </select>
+        </form>
+
+        <div class="menu">
+            <div id="main">
+				<button class="buttons" id="login-logout-button" onclick="logout()">Log out</button>
+            </div>
+        </div>
+    </div>
+    <div class="optionSelect">
+        <select name="showReservationsSelect" id="showReservationsSelect"></select>
+        <button id="reservation-button" onclick="showReservationByStatus()">Show Reservations</button>
+    </div>                  
+
+    <div class="modal">
+        <h1>Car's Damage</h1>
         <table>
-            <caption>Add new car's damage</caption>
+            <caption id="car-new-damage-caption">Add new car's damage</caption>
             <tr>
-                <th>Car:</th>
+                <th id="car-caption">Car:</th>
                 <td id="car" name="car" class="cleaningform">
                 </td>
             </tr>
             <tr>
-                <th>Car's Number:</th>
+                <th id="car-number-caption">Car's Number:</th>
                 <td id="vin" name="vin" class="cleaningform">
                 </td>
             </tr>
             <tr>
-                <th>Client:</th>
+                <th id="client-caption">Client:</th>
                 <td id="client" name="client" class="cleaningform">
                 </td>
             </tr>
             <tr>
-                <th>Type of Damage:</th>
+                <th id="type-damage-caption">Type of Damage:</th>
                 <td>
                     <select id="selectDamageType" name="selectDamageType" ></select>
                 </td>
             </tr>
             <tr>
-                <th>Information:</th>
+                <th id="info-caption">Information:</th>
                 <td>
                     <textarea style="resize:none" maxlength="300" cols="31" rows="3" id="note" name="note"></textarea>
                 </td>
             </tr>
             <tr>
-                <th>Amount, $:</th>
+                <th id="amount-caption">Amount, $:</th>
                 <td>
                     <input type="text" id="amount" name="amount" size="30" class="cleaningform">
                 </td>
             </tr>
             <tr>
-                <td colspan="2" align="center">
+                <td colspan="2">
                     <input type="hidden" id="hiddenReservationId">
-                    <input type="button" id="commit" value="Commit" onclick="addCarsDamage()"/>
-                    <input type="button" value="Cancel" onclick="cancel()"/>
+                    <button id="commit-button" onclick="addCarsDamage()">Commit</button>
+                    <button id="cancel-button" onclick="cancel()">Cancel</button>
                 </td>
             </tr>
         </table>
-    </form>
-</div>
+    </div>
 
-<div class="wrapper">
-
-    <header class="header">
-        <div>
-		<table>     
-            <tr>
-		        <th>Show Reservations with status </th>
-		        <td><select name="showReservationsSelect" id="showReservationsSelect"></select></td>
-		    </tr>
-		    <tr>
-                <td colspan='2' align="center">
-                    <input type="button" value="Show Reservations" onclick="showReservationByStatus()">
-            	</td>
-            </tr>
-        </table>
-        </div>
-    </header><!-- .header-->
-
-    <div class="middle" id="middle">
-
-		<div style="float: left; width: 15%; height: 100%; background: #B5E3FF"></div>
-        <div style="float: left; width: 85%; height: 100%; " id="reservations"></div>
-            
-    </div><!-- .middle-->
-
-</div><!-- .wrapper -->
-
-
-
-
-<footer class="footer">
-    <strong>Footer:</strong>
-</footer><!-- .footer -->
-
+    <div class="container">
+        <div id="reservations"></div>
+    </div>
+  
+    <div class="fixed-footer">
+        <div id="footer-caption">Have a nice trip</div>        
+    </div>
+  
 </body>
 
 <script type="text/javascript" src="js/common.js" defer></script>
+<script type="text/javascript" src="js/localization.js" defer></script>
 
 <script type="text/javascript">
 var parsedJSON;
+var statusOnShow;
 var statusMonitoringId;
 var actionStatus = "reservation_status";
 var actionDamageType = "damage_type";
 
 function initialize(){
-//	var selectShowReservatios = document.getElementById("showReservations");
+	setLocalization();
+	setButtonLoginLogout("logout");
 	let status = document.getElementById("showReservationsSelect");
-    //setStatus(status.id);
     setSelect(actionStatus, status.id);
 }
 
-// Function to show all reservations with selected status. Part 1
+// Function to show all reservations with selected status
 function showReservationByStatus() { 
-    //to empty DOM elements
-  /*  let div = document.getElementById("reservations");
-    while (div.firstChild) {
-        div.removeChild(div.firstChild);
-    }*/
+    clear();
     var action = "reservation_monitoring";   
-    let statusOnShow = document.getElementById("showReservationsSelect");
+    statusOnShow = document.getElementById("showReservationsSelect");
     statusMonitoringId = statusOnShow.options[statusOnShow.selectedIndex].value;
     getReservations(action, statusMonitoringId);
 }
 
-// Function to show all reservations with selected status. Part 2 
 function getReservations(action, selectedStatus) {
     var request = CreateRequest();
     request.open("POST", action, true); 
@@ -196,58 +143,59 @@ function showReservations(request){
 		// creates a <table> element 
 		let table = document.createElement("table");
 		//table.setAttribute("border", "1px solid black");
-		table.setAttribute("id", "reservation" + i);
+        table.setAttribute("id", "reservation" + i);
+        table.setAttribute("class", "reservations");
         let row = table.insertRow(0);
         let cell = document.createElement('th');
         cell.setAttribute("colspan", "2");
-        cell.innerHTML = "Number: " + parsedJSON[i].uniqueNumber;         
+        cell.innerHTML = setElementText("car-number-caption") + parsedJSON[i].uniqueNumber;         
         row.appendChild(cell);
    		// 1st row
         row = table.insertRow(1);  
         cell = row.insertCell(0);
-        cell.innerHTML = "Car"; 
+        cell.innerHTML = setElementText("car-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].car.brand.brandName + " " + parsedJSON[i].car.model; 
         // 2nd row
         row = table.insertRow(2); 
         cell = row.insertCell(0);
-        cell.innerHTML = "Client"; 
+        cell.innerHTML = setElementText("client-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].client.lastName + " " + parsedJSON[i].client.firstName; 
         // 3rd row
         row = table.insertRow(3); 
         cell = row.insertCell(0);
-        cell.innerHTML = "Client's Birth Year"; 
+        cell.innerHTML = setElementText("clients-birth-year"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].client.birthDate; 
         // 4th row           
         row = table.insertRow(4);
         cell = row.insertCell(0);
-        cell.innerHTML = "Pick Up Date"; 
+        cell.innerHTML = setElementText("pick-up-date-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].pickUpDate; 
         // 5th row
         row = table.insertRow(5);
         cell = row.insertCell(0);
-        cell.innerHTML = "Dropp Off Date"; 
+        cell.innerHTML = setElementText("drop-off-date"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].returnDate; 
         // 6th row
         row = table.insertRow(6);
         cell = row.insertCell(0);
-        cell.innerHTML = "Pick Up Location"; 
+        cell.innerHTML = setElementText("pick-up-location-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].pickUpLocation.location.city.cityName + ", " + parsedJSON[i].pickUpLocation.location.address; 
         // 7th row
         row = table.insertRow(7);
         cell = row.insertCell(0);
-        cell.innerHTML = "Drop Off Location"; 
+        cell.innerHTML = setElementText("drop-off-location-caption"); 
         cell = row.insertCell(1);
         cell.innerHTML = parsedJSON[i].returnLocation.location.city.cityName + ", " + parsedJSON[i].returnLocation.location.address;     
         // 8th row
         row = table.insertRow(8);
         cell = row.insertCell(0);
-        cell.innerHTML = "Note"; 
+        cell.innerHTML = setElementText("note"); 
         cell = row.insertCell(1);
         // create text area for some notes if it's needed
         let textarea = document.createElement("textarea");
@@ -266,22 +214,30 @@ function showReservations(request){
         // 9th row
 		row = table.insertRow(9);
 		cell = row.insertCell(0);
-		cell.innerHTML = "Status";
-		cell = row.insertCell(1);
-		cell.innerHTML = "<select name=\"innerSelect\" id=\"innerSelect" + i +"\"></select>";
-        // 10th row
-		row = table.insertRow(10);
-		let td = document.createElement('td');
-		td.setAttribute("colspan", "2");
-		td.setAttribute("align", "center");
-		row.appendChild(td);
-		// create a button
-		let buttonConfirm = document.createElement("input");
-		buttonConfirm.setAttribute('type', "button");
-		buttonConfirm.setAttribute('value', "Confirm");
-		buttonConfirm.setAttribute('id', i);
-		buttonConfirm.setAttribute('onclick', "updateStatus(" + i + ")");
-		td.appendChild(buttonConfirm);
+		cell.innerHTML = setElementText("status");
+        cell = row.insertCell(1);
+        
+        let statusInner = statusOnShow.options[statusOnShow.selectedIndex].text;
+        if (statusInner == "rejected" || statusInner == "cancelled" || statusInner == "closed") {
+            cell.innerHTML = parsedJSON[i].status.statusName;
+        }  else {  
+            cell.innerHTML = "<select name=\"innerSelect\" id=\"innerSelect" + i +"\"></select>";
+            // 10th row
+    		row = table.insertRow(10);
+    		let td = document.createElement('td');
+    		td.setAttribute("colspan", "2");
+    		td.setAttribute("align", "center");
+    		row.appendChild(td);
+    		// create a button
+    		let buttonConfirm = document.createElement("input");
+    		buttonConfirm.setAttribute('type', "button");
+    		buttonConfirm.setAttribute('value', setElementText("commit-button"));
+    		buttonConfirm.setAttribute('id', i);
+    		buttonConfirm.setAttribute('onclick', "updateStatus(" + i + ")");
+    		td.appendChild(buttonConfirm);
+        }
+        
+
 		// create hiddenId
 		let hiddenId = document.createElement("input");
 		hiddenId.setAttribute('type', "hidden");
@@ -291,13 +247,13 @@ function showReservations(request){
 		
 		//create a div
 		let divInner = document.createElement("div");
-		divInner.setAttribute('id',"div" + i);
+        divInner.setAttribute('id',"div" + i);
+        divInner.setAttribute("class", "tables");
 		divInner.appendChild(table);		
 		let br = document.createElement("br");
 		divInner.appendChild(br);
 		div.appendChild(divInner);
 	}	
-    //setStatus("innerSelect");
     setSelect("reservation_status_matched", "innerSelect");
 }
 
@@ -326,10 +282,8 @@ function setStatus(selectName) {
 function updateStatus(jsonId){
     let action = "reservation_status_change";
     let innerSelect = document.getElementById("innerSelect" + jsonId);
-  //  let selectedStatus = innerSelect.options[innerSelect.selectedIndex].value;
     let selectedStatus = innerSelect.options[innerSelect.selectedIndex];
     if (selectedStatus.text != "damaged"){
-    //    recordNewDamage(jsonId);
         let innerNote = document.getElementById("innerNote" + jsonId);
         let id = "id=" + parsedJSON[jsonId].id;
         let statusId = "&statusId=" + selectedStatus.value;
@@ -342,17 +296,24 @@ function updateStatus(jsonId){
         request.onreadystatechange = function () {
             if (request.readyState == 4) {
                 if (request.status == 200){
-                    let table = document.getElementById("reservation" + jsonId);
-                    clearElement(table);
+               		showReservationByStatus();
                 } else {
                     document.write("Server's response " + request.status);      
                 }
             }
         };
         request.send(value);
-        showReservationByStatus();
     } else {
         recordNewDamage(jsonId);
+    }
+}
+
+function clear(){
+    let divs = document.querySelectorAll("div.tables");
+    for (let i=0; i<divs.length; i++){
+        while (divs[i].firstChild) {
+            divs[i].removeChild(divs[i].firstChild);
+        }
     }
 }
 
@@ -466,6 +427,24 @@ function addCarsDamage(){
     showReservationByStatus();
     hideModal();
 }
+
+function logout(){
+		let action = "logout";
+		var request = CreateRequest();
+		request.open("POST", action, true);
+		//Send the proper header information along with the request
+	//	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		request.onreadystatechange = function () {
+			if (request.readyState == 4) {
+				if (request.status == 200) {
+					window.location.href = "carSearchPage.html";
+				} else {
+					document.write("Server's response " + request.status);
+				}
+			}
+		};
+		request.send(null);
+	}
 </script>
 
 </html>

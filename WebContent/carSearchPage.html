@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Car Rental System</title>
+
+<link rel="stylesheet" href="style/modal.css" type="text/css" />
+<link rel="stylesheet" href="style/style.css" type="text/css" />
+</head>
+
+<body onload='initialize()'>
+
+    <!-- Modal window-->
+	<div class="modal">
+		<h1 id="account-caption">ACCOUNT LOGIN</h1>
+		<div>
+			<table>
+				<tr>
+					<th id="login-email-caption">Login: </th>
+					<td><input type="text" name="login" id="login" size="30" class="cleaningform" placeholder="Your email.."></td>
+				</tr>
+				<tr>
+					<th id="password-caption">Password:</th>
+					<td><input type="password" name="password" id="password" size="30" class="cleaningform" placeholder="Your password.."></td>
+				</tr>
+			</table>
+			<div class="error" id="loginFormError"></div>
+			<div class="holderInCenter">
+				<input type="radio" name="role" id="roleAdmin" value="admin"/>
+				<label for="roleAdmin" id="role-admin-caption">Admin</label>	
+		
+				<input type="radio" name="role" id="roleClient" value="client"/>
+				<label for="roleClient" id="role-client-caption">Client</label>					
+			</div>
+			<div class="error" id="roleError"></div>
+			<div class="holderInCenter">
+				<button id="login-button" onclick="getLoginData()">Log In</button>	
+				<button id="cancel-button" onclick="cancel()"> Cancel</button>
+			</div>
+			
+		</div>
+	</div>
+
+ <!-- Page-->
+    <div class="fixed-header">
+        <p id="header-caption">Car Rental System</p>
+
+		<form>
+			<select class="locale" name="locale" id="locale" onchange="setCookieLocale()">
+	            <option selected disabled>--Language--</option>
+	            <option value="en">English</option>
+	            <option value="ru">Русский</option>
+	        </select>
+        </form>
+
+
+        <div class="menu">
+            <div id="main">               
+				<button class="buttons" id="login-logout-button" onclick="openWin()">Log In</button>     
+				<button class="buttons" id="cabinet-button" onclick="showCabinet()" style="display:none">My Reservations</button> 
+	        </div>
+      </div>
+
+	</div>
+
+    <div class="container">
+        <div id="periodLocation" class="content">
+			<div class="form">
+				<label class="labelForm" for="pickUpLocation" id="pick-up-location-caption">Pick Up Location:</label><br>
+				<select class="location" name="pickUpLocation" id="pickUpLocation"></select>
+			</div>
+			<div>
+				<label class="labelForm" for="pickUpDate" id="pick-up-date-caption">Pick Up Date:</label><br>
+				<input type="date" name="pickUpDate" id="pickUpDate">
+			</div>
+			<br>
+			<div>
+				<label class="labelForm" for="dropOffLocation" id="drop-off-location-caption">Drop Off Location:</label><br>
+				<select class="location" name="dropOffLocation" id="dropOffLocation"></select><br>
+			</div>
+			<div>
+				<label class="labelForm" for="dropOffDate" id="drop-off-date-caption">Drop Off Date:</label><br>
+				<input type="date" name="dropOffDate" id="dropOffDate"><br>
+			</div>
+	<br>
+			<button id="search-button" name="searchButton" onclick="getSearchingInfo()">Find Your Car</button>
+	<br>
+	<br>
+			<div class="error" id="errorMsg"></div>
+		</div>
+
+	</div><!-- .container -->
+
+    <div class="fixed-footer">
+        <div id="footer-caption">Have a nice trip</div>        
+    </div>
+
+</body>
+<script type="text/javascript" src="js/common.js" defer></script>
+<script type="text/javascript" src="js/localization.js" defer></script>
+<script type="text/javascript">
+var login;
+var password;
+var role;
+var pickUpLocationSelect;
+var dropOffLocationSelect;
+var pickUpDate = document.getElementById("pickUpDate");;
+var dropOffDate = document.getElementById("dropOffDate"); 
+
+function initialize() 
+{
+	pickUpLocationSelect = document.getElementById("pickUpLocation");
+	dropOffLocationSelect = document.getElementById("dropOffLocation");
+
+	setLocations();
+	setCalendar();
+	isLoggedUser();
+	setLocalization();
+}
+
+function setLocations() 
+{
+	let selectList = document.querySelectorAll('.location');
+	var request = CreateRequest();
+	request.open('POST', 'office', true);
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {
+				var list = JSON.parse(request.responseText);
+				for (let j = 0; j < selectList.length; j++){
+					selectList[j][0] = new Option("-- select a location --", 0);
+					selectList[j].options[0].disabled = true;
+        	        for (let i = 0; i < list.length; i++) {
+    			    //  append the element to the end of Array list new Option(text, val)
+        	    	    selectList[j][i+1] = new Option(list[i].location.city.cityName + ', ' + list[i].location.address, list[i].id);
+    		    	} // inner cycle for options[i]
+            	} // outer cycle for select[j] 		
+			} // if 200
+		} //if 4
+	};
+	request.send(null);
+}
+
+function setCalendar() 
+{
+	let today = new Date();
+	let year = today.getFullYear();
+	let month = today.getMonth() + 1;	
+	let day = today.getDate();
+	let tomorrow = today.setDate(today.getDate() + 1);
+
+	if (day < 10) {
+		day = "0" + day;
+	}
+	if (month < 10) {
+		month = "0" + month;
+	}
+
+	pickUpDate.setAttribute('value', year + "-" + month + "-" + day);
+	dropOffDate.setAttribute('value', year + "-" + month + "-" + day);
+	pickUpDate.setAttribute('min', year + "-" + month + "-" + day);
+	dropOffDate.setAttribute('min', year + "-" + month + "-" + day);
+	pickUpDate.setAttribute('max', (year + 1) + '-12-31');
+	dropOffDate.setAttribute('max', (year + 1) + '-12-31');
+}
+
+function getLoginData() 
+{
+	let login = document.getElementById("login").value;
+	let password = document.getElementById("password").value;
+
+	let radioList = document.getElementsByName("role");
+	for (let i = 0; i < radioList.length; i++) {
+		if (radioList[i].checked) {
+			role = radioList[i].value;
+		}
+	}
+	let action = "login";
+	let value = "login=" + login + "&password=" + password + "&role=" + role;
+	autorization(action, value);
+}
+
+
+function autorization(action, value) 
+{
+	let errorMsg = document.getElementById("badLogin");
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {
+				switch(request.responseText){
+				case "true":
+					window.location.href = "carSearchPage.html";
+					hideModal();
+					break;
+				default:
+					//errorMsg.innerText = request.responseText;
+					showErrorMassage(request);
+				} 
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(value);
+}
+
+function showCabinetButton()
+{
+	let buttonCabinet = document.getElementById("cabinetButton");
+	if (buttonCabinet.style.display === "none")
+		buttonCabinet.style.display = "table-row";
+}
+
+function showCabinet() 
+{
+	window.location.href = "clientReservationsPage.html";
+}
+
+function isLoggedUser()
+{
+	let action = "isLoggedUser";
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {					
+				if (request.responseText == "admin"){
+						window.location.href = "adminPage.html";
+				} else {
+					if (request.responseText == "client"){
+						setButtonLoginLogout("logout");
+						showCabinetButton();
+					} 												
+				}
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(null);
+}
+
+function getLoggedInCient()
+{
+	let action = "getLoggedInCient";
+	var request = CreateRequest();
+	request.open("POST", action, true);
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200) {					
+				let client = JSON.parse(request.responseText);
+			} else {
+				document.write("Server's response " + request.status);
+			}
+		}
+	};
+	request.send(null);
+}
+
+function getSearchingInfo()
+{
+	let action = "search";
+	let pickUpLocationId = pickUpLocationSelect.options[pickUpLocationSelect.selectedIndex].value;
+	let dropOffLocationId = dropOffLocationSelect.options[dropOffLocationSelect.selectedIndex].value;
+	let value = "pickUpLocation=" + pickUpLocationId;
+	value += "&dropOffLocation=" + dropOffLocationId;
+	value += "&pickUpDate=" + pickUpDate.value;
+	value += "&dropOffDate=" + dropOffDate.value;
+	searchAvailableCars(action, value);
+}
+
+function searchAvailableCars(action, value)
+{
+	var request = CreateRequest();
+	request.open("POST", action, true); 
+	//Send the proper header information along with the request
+	request.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			if (request.status == 200){
+				if (request.responseText != ""){
+					//document.getElementById("errorMsg").innerText = request.responseText;
+					showErrorMassage(request);
+				} else {
+					window.location.href = "carSelectionPage.html";
+				}
+			} else {
+				document.write("Server's response " + request.status);      
+			}
+		}
+	};
+	request.send(value);
+}
+/*
+function openWin() 
+{
+	let errorMsg = document.getElementById("badLogin");
+	errorMsg.innerHTML = "";
+	overflow.className = "overflow";
+	document.body.appendChild(overflow);
+	var height = modal.offsetHeight;
+	modal.style.marginTop = - height/2 + "px";
+	modal.style.top = "50%";
+	modal.style.position = "fixed";
+	modal.style.transform = "translate(-50%, 0%)";
+}*/
+</script>
+
+
+
+</html>
